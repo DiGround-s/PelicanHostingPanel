@@ -1,0 +1,23 @@
+{
+  "_streamed": true,
+  "_format": "sse-json",
+  "_stage": "client_response",
+  "_eventCount": 11,
+  "summary": {
+    "choices": [
+      {
+        "message": {
+          "role": "assistant",
+          "content": "¡Hola! ¿En qué puedo ayudarte?¡Hola! ¿En qué puedo ayudarte?"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 28251,
+      "completion_tokens": 13,
+      "total_tokens": 28264
+    },
+    "_streamed": true
+  }
+}

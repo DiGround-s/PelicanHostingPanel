@@ -1,0 +1,1905 @@
+{
+  "timestamp": "2026-07-25T21:24:32.681Z",
+  "endpoint": "/v1/chat/completions",
+  "headers": {
+    "accept": "*/*",
+    "access-control-allow-headers": "Content-Type, Authorization, x-api-key, anthropic-version, x-omniroute-connection, x-internal-test, accept",
+    "access-control-allow-methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+    "access-control-allow-origin": "*",
+    "authorization": "[REDACTED]",
+    "connection": "close",
+    "content-length": "108776",
+    "content-type": "application/json",
+    "host": "omniroute.exylia.net",
+    "user-agent": "opencode/1.18.4 ai-sdk/provider-utils/4.0.23 runtime/bun/1.3.14",
+    "vary": "Origin",
+    "x-forwarded-for": "192.168.4.137",
+    "x-forwarded-host": "omniroute.exylia.net",
+    "x-forwarded-method": "POST",
+    "x-forwarded-port": "443",
+    "x-forwarded-proto": "https",
+    "x-forwarded-scheme": "https",
+    "x-forwarded-uri": "/v1/chat/completions",
+    "x-omniroute-auth-id": "key_1bbf",
+    "x-omniroute-auth-kind": "client_api_key",
+    "x-omniroute-peer-locality": "remote",
+    "x-omniroute-route-class": "CLIENT_API",
+    "x-original-method": "POST",
+    "x-original-url": "https://omniroute.exylia.net/v1/chat/completions",
+    "x-real-ip": "192.168.4.137",
+    "x-request-id": "6f3ee8ed-d869-43d2-9c4a-48277804ccfe",
+    "x-session-affinity": "ses_064e3de76ffeiVzX8gBgZrDnfm",
+    "x-session-id": "ses_064e3de76ffeiVzX8gBgZrDnfm"
+  },
+  "body": {
+    "model": "Coding",
+    "max_tokens": 32000,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are opencode, an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.\n\nIMPORTANT: You must NEVER generate or guess URLs for the user unless you are confident that the URLs are for helping the user with programming. You may use URLs provided by the user in their messages or local files.\n\nIf the user asks for help or wants to give feedback inform them of the following:\n- /help: Get help with using opencode\n- To give feedback, users should report the issue at https://github.com/anomalyco/opencode/issues\n\nWhen the user directly asks about opencode (eg 'can opencode do...', 'does opencode have...') or asks in second person (eg 'are you able...', 'can you do...'), first use the WebFetch tool to gather information to answer the question from opencode docs at https://opencode.ai\n\n# Tone and style\nYou should be concise, direct, and to the point. When you run a non-trivial bash command, you should explain what the command does and why you are running it, to make sure the user understands what you are doing (this is especially important when you are running a command that will make changes to the user's system).\nRemember that your output will be displayed on a command line interface. Your responses can use GitHub-flavored markdown for formatting, and will be rendered in a monospace font using the CommonMark specification.\nOutput text to communicate with the user; all text you output outside of tool use is displayed to the user. Only use tools to complete tasks. Never use tools like Bash or code comments as means to communicate with the user during the session.\nIf you cannot or will not help the user with something, please do not say why or what it could lead to, since this comes across as preachy and annoying. Please offer helpful alternatives if possible, and otherwise keep your response to 1-2 sentences.\nOnly use emojis if the user explicitly requests it. Avoid using emojis in all communication unless asked.\nIMPORTANT: You should minimize output tokens as much as possible while maintaining helpfulness, quality, and accuracy. Only address the specific query or task at hand, avoiding tangential information unless absolutely critical for completing the request. If you can answer in 1-3 sentences or a short paragraph, please do.\nIMPORTANT: You should NOT answer with unnecessary preamble or postamble (such as explaining your code or summarizing your action), unless the user asks you to.\nIMPORTANT: Keep your responses short, since they will be displayed on a command line interface. You MUST answer concisely with fewer than 4 lines (not including tool use or code generation), unless user asks for detail. Answer the user's question directly, without elaboration, explanation, or details. One word answers are best. Avoid introductions, conclusions, and explanations. You MUST avoid text before/after your response, such as \"The answer is <answer>.\", \"Here is the content of the file...\" or \"Based on the information provided, the answer is...\" or \"Here is what I will do next...\". Here are some examples to demonstrate appropriate verbosity:\n<example>\nuser: what is 2+2?\nassistant: 4\n</example>\n\n<example>\nuser: is 11 a prime number?\nassistant: Yes\n</example>\n\n<example>\nuser: what command should I run to list files in the current directory?\nassistant: ls\n</example>\n\n<example>\nuser: what command should I run to watch files in the current directory?\nassistant: [use the ls tool to list the files in the current directory, then read docs/commands in the relevant file to find out how to watch files]\nnpm run dev\n</example>\n\n<example>\nuser: what files are in the directory src/?\nassistant: [runs ls and sees foo.c, bar.c, baz.c]\nuser: which file contains the implementation of foo?\nassistant: src/foo.c\n</example>\n\n<example>\nuser: write tests for new feature\nassistant: [uses grep and glob search tools to find where similar tests are defined, uses concurrent read file tool use blocks in one tool call to read relevant files at the same time, uses edit file tool to write new tests]\n</example>\n\n# Proactiveness\nYou are allowed to be proactive, but only when the user asks you to do something. You should strive to strike a balance between:\n1. Doing the right thing when asked, including taking actions and follow-up actions\n2. Not surprising the user with actions you take without asking\nFor example, if the user asks you how to approach something, you should do your best to answer their question first, and not immediately jump into taking actions.\n3. Do not add additional code explanation summary unless requested by the user. After working on a file, just stop, rather than providing an explanation of what you did.\n\n# Following conventions\nWhen making changes to files, first understand the file's code conventions. Mimic code style, use existing libraries and utilities, and follow existing patterns.\n- NEVER assume that a given library is available, even if it is well known. Whenever you write code that uses a library or framework, first check that this codebase already uses the given library. For example, you might look at neighboring files, or check the package.json (or cargo.toml, and so on depending on the language).\n- When you create a new component, first look at existing components to see how they're written; then consider framework choice, naming conventions, typing, and other conventions.\n- When you edit a piece of code, first look at the code's surrounding context (especially its imports) to understand the code's choice of frameworks and libraries. Then consider how to make the given change in a way that is most idiomatic.\n- Always follow security best practices. Never introduce code that exposes or logs secrets and keys. Never commit secrets or keys to the repository.\n\n# Code style\n- IMPORTANT: DO NOT ADD ***ANY*** COMMENTS unless asked\n\n# Doing tasks\nThe user will primarily request you perform software engineering tasks. This includes solving bugs, adding new functionality, refactoring code, explaining code, and more. For these tasks the following steps are recommended:\n- Use the available search tools to understand the codebase and the user's query. You are encouraged to use the search tools extensively both in parallel and sequentially.\n- Implement the solution using all tools available to you\n- Verify the solution if possible with tests. NEVER assume specific test framework or test script. Check the README or search codebase to determine the testing approach.\n- VERY IMPORTANT: When you have completed a task, you MUST run the lint and typecheck commands (e.g. npm run lint, npm run typecheck, ruff, etc.) with Bash if they were provided to you to ensure your code is correct. If you are unable to find the correct command, ask the user for the command to run and if they supply it, proactively suggest writing it to AGENTS.md so that you will know to run it next time.\nNEVER commit changes unless the user explicitly asks you to. It is VERY IMPORTANT to only commit when explicitly asked, otherwise the user will feel that you are being too proactive.\n\n- Tool results and user messages may include <system-reminder> tags. <system-reminder> tags contain useful information and reminders. They are NOT part of the user's provided input or the tool result.\n\n# Tool usage policy\n- When doing file search, prefer to use the Task tool in order to reduce context usage.\n- You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance. When making multiple bash tool calls, you MUST send a single message with multiple tools calls to run the calls in parallel. For example, if you need to run \"git status\" and \"git diff\", send a single message with two tool calls to run the calls in parallel.\n\nYou MUST answer concisely with fewer than 4 lines of text (not including tool use or code generation), unless user asks for detail.\n\nIMPORTANT: Before you begin work, think about what the code you're editing is supposed to do based on the filenames directory structure.\n\n# Code References\n\nWhen referencing specific functions or pieces of code include the pattern `file_path:line_number` to allow the user to easily navigate to the source code location.\n\n<example>\nuser: Where are errors from the client handled?\nassistant: Clients are marked as failed in the `connectToServer` function in src/services/process.ts:712.\n</example>\n\nYou are powered by the model named Coding. The exact model ID is omniroute/Coding\nHere is some useful information about the environment you are running in:\n<env>\n  Working directory: /home/coder/projects/Extras/PelicanHostingPanel\n  Workspace root folder: /home/coder/projects/Extras/PelicanHostingPanel\n  Is directory a git repo: yes\n  Platform: linux\n  Today's date: Sat Jul 25 2026\n</env>\n<mcp_instructions>\n  <server name=\"context7\">\n    Use this server to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service — even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer — your training data may not reflect recent changes. Prefer this over web search for library docs.\n    \n    Do not use for: refactoring, writing scripts from scratch, debugging business logic, code review, or general programming concepts.\n  </server>\n</mcp_instructions>\nSkills provide specialized instructions and workflows for specific tasks.\nUse the skill tool to load a skill when a task matches its description.\n<available_skills>\n  <skill>\n    <name>caveman</name>\n    <description>Ultra-compressed communication mode. Cuts output tokens 65% (measured) by speaking like caveman while keeping full technical accuracy. Supports intensity levels: lite, full (default), ultra, wenyan-lite, wenyan-full, wenyan-ultra. Use when user says \"caveman mode\", \"talk like caveman\", \"use caveman\", \"less tokens\", \"be brief\", or invokes /caveman. Also auto-triggers when token efficiency is requested.\n</description>\n    <location>/home/coder/.config/opencode/skills/caveman/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>customize-opencode</name>\n    <description>Use ONLY when the user is editing or creating opencode's own configuration: opencode.json, opencode.jsonc, files under .opencode/, or files under ~/.config/opencode/. Also use when creating or fixing opencode agents, subagents, skills, plugins, MCP servers, or permission rules. Do not use for the user's own application code, or for any project that is not configuring opencode itself.</description>\n    <location>&lt;built-in&gt;</location>\n  </skill>\n  <skill>\n    <name>exylia-style-guide</name>\n    <description>Apply Exylia's premium, minimalist, galactic visual language and UX standards to Node/web work. Use when designing or implementing Next.js, NestJS, React, dashboards, landing pages, full-stack applications, or any web interface for Exylia.</description>\n    <location>/home/coder/.config/opencode/skills/exylia-style-guide/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>fullstack-dev</name>\n    <description>Full-stack backend architecture and frontend-backend integration guide.\nTRIGGER when: building a full-stack app, creating REST API with frontend, scaffolding backend service,\nbuilding todo app, building CRUD app, building real-time app, building chat app,\nExpress + React, Next.js API, Node.js backend, Python backend, Go backend,\ndesigning service layers, implementing error handling, managing config/auth,\nsetting up API clients, implementing auth flows, handling file uploads,\nadding real-time features (SSE/WebSocket), hardening for production.\nDO NOT TRIGGER when: pure frontend UI work, pure CSS/styling, database schema only.\n</description>\n    <location>/home/coder/.config/opencode/skills/fullstack-dev/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>karpathy-guidelines</name>\n    <description>Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.</description>\n    <location>/home/coder/.config/opencode/skills/karpathy-guidelines/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>landing-page-cro</name>\n    <description>Audit and optimize landing pages for conversion rate optimization. Analyzes page structure, copy effectiveness, CTA placement, social proof, form friction, and trust signals. Provides a CRO score and actionable recommendations. Use when the user has an existing landing page and mentions CRO, conversion audit, why isn't my page converting, A/B test ideas, or wants a scored audit of a live URL. For designing a new page from scratch, use saas-landing-builder instead.\n</description>\n    <location>/home/coder/.config/opencode/skills/landing-page-cro/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>nextjs-senior-dev</name>\n    <description>Senior Next.js 15+/16 Engineer skill for App Router. Use when scaffolding production apps, enforcing RSC patterns, auditing codebases, or optimizing performance.</description>\n    <location>/home/coder/.config/opencode/skills/nextjs-senior-dev/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail</name>\n    <description>Forces the laziest solution that actually works, simplest, shortest, most minimal. Channels a senior dev who has seen everything: question whether the task needs to exist at all (YAGNI), reach for the standard library before custom code, native platform features before dependencies, one line before fifty. Supports intensity levels: lite, full (default), ultra. Use on ANY coding task: writing, adding, refactoring, fixing, reviewing, or designing code, and choosing libraries or dependencies. Also use whenever the user says \"ponytail\", \"be lazy\", \"lazy mode\", \"simplest solution\", \"minimal solution\", \"yagni\", \"do less\", or \"shortest path\", or complains about over-engineering, bloat, boilerplate, or unnecessary dependencies. Do NOT use for non-coding requests (general knowledge, prose, translation, summaries, recipes).\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail-audit</name>\n    <description>Whole-repo audit for over-engineering. Like ponytail-review, but scans the entire codebase instead of a diff: a ranked list of what to delete, simplify, or replace with stdlib/native equivalents. Use when the user says \"audit this codebase\", \"audit for over-engineering\", \"what can I delete from this repo\", \"find bloat\", \"ponytail-audit\", or \"/ponytail-audit\". One-shot report, does not apply fixes.\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail-audit/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail-debt</name>\n    <description>Harvest every `ponytail:` comment in the codebase into a debt ledger, so the deliberate shortcuts and deferrals ponytail leaves behind get tracked instead of rotting into \"later means never\". Use when the user says \"ponytail debt\", \"/ponytail-debt\", \"what did ponytail defer\", \"list the shortcuts\", \"ponytail ledger\", or \"what did we mark to do later\". One-shot report, changes nothing.\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail-debt/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail-gain</name>\n    <description>Show ponytail's measured impact as a compact scoreboard: less code, less cost, more speed, from the benchmark medians. One-shot display, not a persistent mode, and not a per-repo number. Trigger: /ponytail-gain, \"ponytail gain\", \"what does ponytail save\", \"show ponytail impact\", \"ponytail scoreboard\".\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail-gain/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail-help</name>\n    <description>Quick-reference card for all ponytail modes, skills, and commands. One-shot display, not a persistent mode. Trigger: /ponytail-help, \"ponytail help\", \"what ponytail commands\", \"how do I use ponytail\".\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail-help/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ponytail-review</name>\n    <description>Code review focused exclusively on over-engineering. Finds what to delete: reinvented standard library, unneeded dependencies, speculative abstractions, dead flexibility. One line per finding: location, what to cut, what replaces it. Use when the user says \"review for over-engineering\", \"what can we delete\", \"is this over-engineered\", \"simplify review\", or invokes /ponytail-review. Complements correctness-focused review, this one only hunts complexity.\n</description>\n    <location>/home/coder/.config/opencode/skills/ponytail-review/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>token-optimizer</name>\n    <description>Find the ghost tokens. Audit Claude Code or Codex setup, see where context goes, fix it. Use when context feels tight.</description>\n    <location>/home/coder/.config/opencode/skills/token-optimizer/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ui-designer</name>\n    <description>Extract design systems from reference UI images and generate implementation-ready UI design prompts. Use when users provide UI screenshots/mockups and want to create consistent designs, generate design systems, or build MVP UIs matching reference aesthetics.</description>\n    <location>/home/coder/.config/opencode/skills/ui-designer/SKILL.md</location>\n  </skill>\n  <skill>\n    <name>ui-ux-pro-max</name>\n    <description>UI/UX design intelligence for web and mobile. Searchable local database with 84 styles, 192 color palettes, 74 font pairings, 192 product types, 98 UX guidelines, 104 icon entries, 16 GSAP motion presets, and 25 chart types across 22 stacks (React, Next.js, Vue, Nuxt, Svelte, Astro, SwiftUI, React Native, Flutter, Tailwind, shadcn/ui, Jetpack Compose, Angular, Laravel, JavaFX, WPF, WinUI, Avalonia, Uno Platform, UWP, Three.js, and HTML/CSS). Use when designing, building, or reviewing UI: pages, components, color schemes, typography, layout, accessibility, animation, or data visualization.</description>\n    <location>/home/coder/.config/opencode/skills/ui-ux-pro-max/SKILL.md</location>\n  </skill>\n</available_skills>"
+      },
+      {
+        "role": "user",
+        "content": "Hola"
+      },
+      {
+        "role": "assistant",
+        "content": "¡Hola! ¿En qué puedo ayudarte?",
+        "reasoning_content": "**Preparing Spanish greeting response**"
+      },
+      {
+        "role": "user",
+        "content": "Hola"
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "bash",
+          "description": "Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.\n\nBe aware: OS: linux, Shell: bash\n\nAll commands run in the current working directory by default. Use the `workdir` parameter if you need to run a command in a different directory. AVOID using `cd <directory> && <command>` patterns - use `workdir` instead.\n\nUse `/tmp/opencode` for temporary work outside the workspace. This directory has already been created, already exists, and is pre-approved for external directory access.\n\nIMPORTANT: This tool is for terminal operations like git, npm, docker, etc. DO NOT use it for file operations (reading, writing, editing, searching, finding files) - use the specialized tools for this instead.\n\nBefore executing the command, please follow these steps:\n\n1. Directory Verification:\n   - If the command will create new directories or files, first use `ls` to verify the parent directory exists and is the correct location\n   - For example, before running \"mkdir foo/bar\", first use `ls foo` to check that \"foo\" exists and is the intended parent directory\n\n2. Command Execution:\n   - Always quote file paths that contain spaces with double quotes (e.g., rm \"path with spaces/file.txt\")\n   - Examples of proper quoting:\n     - mkdir \"/Users/name/My Documents\" (correct)\n     - mkdir /Users/name/My Documents (incorrect - will fail)\n     - python \"/path/with spaces/script.py\" (correct)\n     - python /path/with spaces/script.py (incorrect - will fail)\n   - After ensuring proper quoting, execute the command.\n   - Capture the output of the command.\n\nUsage notes:\n  - The command argument is required.\n  - You can specify an optional timeout in milliseconds. If not specified, commands will time out after 120000ms.\n  - If the output exceeds 2000 lines or 51200 bytes, it will be truncated and the full output will be written to a file. You can use Read with offset/limit to read specific sections or Grep to search the full content. Do NOT use `head`, `tail`, or other truncation commands to limit output; the full output will already be captured to a file for more precise searching.\n\n  - Avoid using Bash with the `find`, `grep`, `cat`, `head`, `tail`, `sed`, `awk`, or `echo` commands, unless explicitly instructed or when these commands are truly necessary for the task. Instead, always prefer using the dedicated tools for these commands:\n    - File search: Use Glob (NOT find or ls)\n    - Content search: Use Grep (NOT grep or rg)\n    - Read files: Use Read (NOT cat/head/tail)\n    - Edit files: Use Edit (NOT sed/awk)\n    - Write files: Use Write (NOT echo >/cat <<EOF)\n    - Communication: Output text directly (NOT echo/printf)\n  - When issuing multiple commands:\n    - If the commands are independent and can run in parallel, make multiple bash tool calls in a single message. For example, if you need to run \"git status\" and \"git diff\", send a single message with two bash tool calls in parallel.\n    - If the commands depend on each other and must run sequentially, use a single Bash call with '&&' to chain them together (e.g., `git add . && git commit -m \"message\" && git push`). For instance, if one operation must complete before another starts (like mkdir before cp, Write before Bash for git operations, or git add before git commit), run these operations sequentially instead.\n    - Use ';' only when you need to run commands sequentially but don't care if earlier commands fail\n    - DO NOT use newlines to separate commands (newlines are ok in quoted strings)\n  - AVOID using `cd <directory> && <command>`. Use the `workdir` parameter to change directories instead.\n    <good-example>\n    Use workdir=\"/foo/bar\" with command: pytest tests\n    </good-example>\n    <bad-example>\n    cd /foo/bar && pytest tests\n    </bad-example>\n\n# Git and GitHub\n- Only commit, amend, push, or create PRs when explicitly requested.\n- Before committing, inspect `git status`, `git diff`, and `git log --oneline -10`; stage only intended files and never commit secrets.\n- Write a concise commit message that matches the repo style.\n- Do not update git config, skip hooks, use interactive `-i`, force-push, or create empty commits unless explicitly requested.\n- If a commit fails or hooks reject it, fix the issue and create a new commit; do not amend the failed commit.\n- Before creating a PR, inspect status, diff, remote tracking, recent commits, and the diff from the base branch.\n- Review all commits included in the PR, not just the latest commit.\n- Use `gh` for GitHub tasks, including PRs, issues, checks, and releases; return the PR URL when done.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "command": "[MaxDepth]",
+              "timeout": "[MaxDepth]",
+              "workdir": "[MaxDepth]"
+            },
+            "required": [
+              "command"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_click",
+          "description": "Clicks on the provided element",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "uid": "[MaxDepth]",
+              "dblClick": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "uid"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_close_page",
+          "description": "Closes the page by its index. The last open page cannot be closed.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pageId": "[MaxDepth]"
+            },
+            "required": [
+              "pageId"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_drag",
+          "description": "Drag an element onto another element",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "from_uid": "[MaxDepth]",
+              "to_uid": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "from_uid",
+              "to_uid"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_emulate",
+          "description": "Emulates various features on the selected page.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "networkConditions": "[MaxDepth]",
+              "cpuThrottlingRate": "[MaxDepth]",
+              "geolocation": "[MaxDepth]",
+              "userAgent": "[MaxDepth]",
+              "colorScheme": "[MaxDepth]",
+              "viewport": "[MaxDepth]",
+              "extraHttpHeaders": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_evaluate_script",
+          "description": "Evaluate a JavaScript function inside the currently selected page. Returns the response as JSON, so returned values have to be JSON-serializable.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "function": "[MaxDepth]",
+              "args": "[MaxDepth]",
+              "filePath": "[MaxDepth]",
+              "dialogAction": "[MaxDepth]"
+            },
+            "required": [
+              "function"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_fill",
+          "description": "Type text into an input, text area or select an option from a <select> element.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "uid": "[MaxDepth]",
+              "value": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "uid",
+              "value"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_fill_form",
+          "description": "Fill out multiple form elements (inputs, selects, checkboxes, radios) at once. ALWAYS prefer this tool over multiple individual 'fill' or 'click' calls when interacting with forms. It is significantly faster, more reliable, and reduces turn count. Example: Fill username, password, and check \"Remember Me\" in one call.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "elements": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "elements"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_get_console_message",
+          "description": "Gets a console message by its ID. You can get all messages by calling list_console_messages.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "msgid": "[MaxDepth]"
+            },
+            "required": [
+              "msgid"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_get_network_request",
+          "description": "Gets a network request by an optional reqid, if omitted returns the currently selected request in the DevTools Network panel.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "reqid": "[MaxDepth]",
+              "requestFilePath": "[MaxDepth]",
+              "responseFilePath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_handle_dialog",
+          "description": "If a browser dialog was opened, use this command to handle it",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "action": "[MaxDepth]",
+              "promptText": "[MaxDepth]"
+            },
+            "required": [
+              "action"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_hover",
+          "description": "Hover over the provided element",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "uid": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "uid"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_lighthouse_audit",
+          "description": "Get Lighthouse score and reports for accessibility, SEO, best practices, and agentic browsing. This excludes performance. For performance audits, run performance_start_trace",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "mode": "[MaxDepth]",
+              "device": "[MaxDepth]",
+              "outputDirPath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_list_console_messages",
+          "description": "List all console messages for the currently selected page since the last navigation.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pageSize": "[MaxDepth]",
+              "pageIdx": "[MaxDepth]",
+              "types": "[MaxDepth]",
+              "includePreservedMessages": "[MaxDepth]",
+              "serviceWorkerId": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_list_network_requests",
+          "description": "List all requests for the currently selected page since the last navigation.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pageSize": "[MaxDepth]",
+              "pageIdx": "[MaxDepth]",
+              "resourceTypes": "[MaxDepth]",
+              "includePreservedRequests": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_list_pages",
+          "description": "Get a list of pages open in the browser.",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_navigate_page",
+          "description": "Go to a URL, or back, forward, or reload. Use project URL if not specified otherwise.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "type": "[MaxDepth]",
+              "url": "[MaxDepth]",
+              "ignoreCache": "[MaxDepth]",
+              "handleBeforeUnload": "[MaxDepth]",
+              "initScript": "[MaxDepth]",
+              "timeout": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_new_page",
+          "description": "Open a new tab and load a URL. Use project URL if not specified otherwise.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "url": "[MaxDepth]",
+              "background": "[MaxDepth]",
+              "isolatedContext": "[MaxDepth]",
+              "timeout": "[MaxDepth]"
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_performance_analyze_insight",
+          "description": "Provides more detailed information on a specific Performance Insight of an insight set that was highlighted in the results of a trace recording.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "insightSetId": "[MaxDepth]",
+              "insightName": "[MaxDepth]"
+            },
+            "required": [
+              "insightSetId",
+              "insightName"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_performance_start_trace",
+          "description": "Start a performance trace on the selected webpage. Use to find frontend performance issues, Core Web Vitals (LCP, INP, CLS), and improve page load speed.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "reload": "[MaxDepth]",
+              "autoStop": "[MaxDepth]",
+              "filePath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_performance_stop_trace",
+          "description": "Stop the active performance trace recording on the selected webpage.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "filePath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_press_key",
+          "description": "Press a key or key combination. Use this when other input methods like fill() cannot be used (e.g., keyboard shortcuts, navigation keys, or special key combinations).",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "key": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "key"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_resize_page",
+          "description": "Resizes the selected page's window so that the page has specified dimension",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "width": "[MaxDepth]",
+              "height": "[MaxDepth]"
+            },
+            "required": [
+              "width",
+              "height"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_select_page",
+          "description": "Select a page as a context for future tool calls.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pageId": "[MaxDepth]",
+              "bringToFront": "[MaxDepth]"
+            },
+            "required": [
+              "pageId"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_take_heapsnapshot",
+          "description": "Capture a heap snapshot of the currently selected page. Use to analyze the memory distribution of JavaScript objects and debug memory leaks.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "filePath": "[MaxDepth]"
+            },
+            "required": [
+              "filePath"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_take_screenshot",
+          "description": "Take a screenshot of the page or element.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "format": "[MaxDepth]",
+              "quality": "[MaxDepth]",
+              "uid": "[MaxDepth]",
+              "fullPage": "[MaxDepth]",
+              "filePath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_take_snapshot",
+          "description": "Take a text snapshot of the currently selected page based on the a11y tree. The snapshot lists page elements along with a unique\nidentifier (uid). Always use the latest snapshot. Prefer taking a snapshot over taking a screenshot. The snapshot indicates the element selected\nin the DevTools Elements panel (if any).",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "verbose": "[MaxDepth]",
+              "filePath": "[MaxDepth]"
+            },
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_type_text",
+          "description": "Type text using keyboard into a previously focused input",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "text": "[MaxDepth]",
+              "submitKey": "[MaxDepth]"
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_upload_file",
+          "description": "Upload a file through a provided element.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "uid": "[MaxDepth]",
+              "filePath": "[MaxDepth]",
+              "includeSnapshot": "[MaxDepth]"
+            },
+            "required": [
+              "uid",
+              "filePath"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "chrome-devtools_wait_for",
+          "description": "Wait for the specified text to appear on the selected page.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "text": "[MaxDepth]",
+              "timeout": "[MaxDepth]"
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false,
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_delete_project",
+          "description": "Delete a project from the index",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_detect_changes",
+          "description": "Detect code changes and their impact",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]",
+              "scope": "[MaxDepth]",
+              "depth": "[MaxDepth]",
+              "base_branch": "[MaxDepth]",
+              "since": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_get_architecture",
+          "description": "Get high-level architecture overview — packages, services, dependencies, and project structure at a glance. Includes 'clusters': Leiden community detection over the call/import graph, surfacing the de-facto modules (each with a label, member count, cohesion score, representative top_nodes, and the packages/edge_types that bind it) — use these to grasp the real architectural seams, which often cut across the folder layout. Optional path scopes analysis to nodes under that directory prefix (file_path).",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]",
+              "path": "[MaxDepth]",
+              "aspects": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_get_code_snippet",
+          "description": "Read source code for a function/class/symbol. IMPORTANT: First call search_graph to find the exact qualified_name, then pass it here. This is a read tool, not a search tool. Accepts full qualified_name (exact match) or short function name (returns suggestions if ambiguous).",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "qualified_name": "[MaxDepth]",
+              "project": "[MaxDepth]",
+              "include_neighbors": "[MaxDepth]"
+            },
+            "required": [
+              "qualified_name",
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_get_graph_schema",
+          "description": "Get the schema of the knowledge graph (node labels, edge types)",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_index_repository",
+          "description": "Index a repository into the knowledge graph. Special mode 'cross-repo-intelligence': skip extraction, only match Routes/Channels across projects to create CROSS_HTTP_CALLS/CROSS_ASYNC_CALLS/CROSS_CHANNEL edges. Requires target_projects param. Ensure target projects have fresh indexes first.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "repo_path": "[MaxDepth]",
+              "mode": "[MaxDepth]",
+              "target_projects": "[MaxDepth]",
+              "name": "[MaxDepth]",
+              "persistence": "[MaxDepth]"
+            },
+            "required": [
+              "repo_path"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_index_status",
+          "description": "Get the indexing status of a project",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_ingest_traces",
+          "description": "Ingest runtime traces to enhance the knowledge graph",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "traces": "[MaxDepth]",
+              "project": "[MaxDepth]"
+            },
+            "required": [
+              "traces",
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_list_projects",
+          "description": "List all indexed projects",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_manage_adr",
+          "description": "Create or update Architecture Decision Records",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]",
+              "mode": "[MaxDepth]",
+              "content": "[MaxDepth]",
+              "sections": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_query_graph",
+          "description": "Execute a Cypher query against the knowledge graph for complex multi-hop patterns, aggregations, and cross-service analysis. The response includes 'total' (returned row count). There is a hard 100k row ceiling — for broad queries add LIMIT in the Cypher itself or use search_graph + offset/limit pagination instead. COMPLEXITY / BOTTLENECKS: every Function and Method node carries queryable complexity properties — cyclomatic (complexity), cognitive, loop_count, loop_depth (max nested-loop depth, a polynomial-degree proxy), plus interprocedural transitive_loop_depth (worst-case nested-loop degree propagated along CALLS edges) and a recursive flag. Additional hot-path signals: linear_scan_in_loop (count of find/contains/indexOf-style scans inside a loop — the hidden O(n^2) that loop_depth misses), alloc_in_loop (allocations/appends inside a loop), recursion_in_loop (a self-call inside a loop), unguarded_recursion (recursion with no conditionally-guarded base case), param_count and max_access_depth (structure smells). Find all hot-path candidates in one query, e.g. MATCH (f:Function) WHERE f.transitive_loop_depth >= 3 OR f.linear_scan_in_loop >= 1 RETURN f.qualified_name, f.transitive_loop_depth, f.linear_scan_in_loop ORDER BY f.transitive_loop_depth DESC.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": "[MaxDepth]",
+              "project": "[MaxDepth]",
+              "max_rows": "[MaxDepth]"
+            },
+            "required": [
+              "query",
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_search_code",
+          "description": "Graph-augmented code search. Finds text patterns via grep, then enriches results with the knowledge graph: deduplicates matches into containing functions, ranks by structural importance (definitions first, popular functions next, tests last). Modes: compact (default, signatures only — token efficient), full (with source), files (just file paths). Use path_filter regex to scope results. TRUNCATION: enriched results are capped at limit (default 10). Response carries 'total_grep_matches' (raw grep hit count) and 'total_results' (deduplicated function count) — compare to limit to detect truncation. There is no offset parameter; to see more, raise limit or narrow the query with file_pattern / path_filter.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "pattern": "[MaxDepth]",
+              "project": "[MaxDepth]",
+              "file_pattern": "[MaxDepth]",
+              "path_filter": "[MaxDepth]",
+              "mode": "[MaxDepth]",
+              "context": "[MaxDepth]",
+              "regex": "[MaxDepth]",
+              "limit": "[MaxDepth]"
+            },
+            "required": [
+              "pattern",
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_search_graph",
+          "description": "Search the code knowledge graph for functions, classes, routes, and variables. Use INSTEAD OF grep/glob when finding code definitions, implementations, or relationships. Three search modes: (1) query='update settings' for BM25 ranked full-text search with camelCase splitting and structural label boosting — recommended for natural-language discovery; (2) name_pattern='.*regex.*' for exact pattern matching; (3) semantic_query=[...] for vector cosine search that bridges vocabulary (finds 'publish' when you search 'send'). The three modes are independent and can be combined in a single call. PAGINATION: results are capped at limit (default 200) — broader queries are silently truncated. The response always includes 'total' (full match count before limit) and 'has_more' (true when total > offset+returned). Detect truncation with has_more, then page by re-calling with offset=offset+limit until has_more is false. Narrow first via label/file_pattern/min_degree before paginating large result sets.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "project": "[MaxDepth]",
+              "query": "[MaxDepth]",
+              "label": "[MaxDepth]",
+              "name_pattern": "[MaxDepth]",
+              "qn_pattern": "[MaxDepth]",
+              "file_pattern": "[MaxDepth]",
+              "relationship": "[MaxDepth]",
+              "min_degree": "[MaxDepth]",
+              "max_degree": "[MaxDepth]",
+              "exclude_entry_points": "[MaxDepth]",
+              "include_connected": "[MaxDepth]",
+              "semantic_query": "[MaxDepth]",
+              "limit": "[MaxDepth]",
+              "offset": "[MaxDepth]"
+            },
+            "required": [
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "codebase-memory_trace_path",
+          "description": "Trace paths through the code graph. Modes: calls (callers/callees), data_flow (value propagation with args at each hop), cross_service (through HTTP/async Route nodes). Use INSTEAD OF grep for callers, dependencies, impact analysis, or data flow tracing.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "function_name": "[MaxDepth]",
+              "project": "[MaxDepth]",
+              "direction": "[MaxDepth]",
+              "depth": "[MaxDepth]",
+              "mode": "[MaxDepth]",
+              "parameter_name": "[MaxDepth]",
+              "edge_types": "[MaxDepth]",
+              "risk_labels": "[MaxDepth]",
+              "include_tests": "[MaxDepth]"
+            },
+            "required": [
+              "function_name",
+              "project"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "context7_query-docs",
+          "description": "Retrieves and queries up-to-date documentation and code examples from Context7 for any programming library or framework.\n\nYou must call 'Resolve Context7 Library ID' tool first to obtain the exact Context7-compatible library ID required to use this tool, UNLESS the user explicitly provides a library ID in the format '/org/project' or '/org/project/version' in their query.\n\nDo not call this tool more than 3 times per question.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "libraryId": "[MaxDepth]",
+              "query": "[MaxDepth]"
+            },
+            "required": [
+              "libraryId",
+              "query"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "context7_resolve-library-id",
+          "description": "Resolves a package/product name to a Context7-compatible library ID and returns matching libraries.\n\nYou MUST call this function before 'Query Documentation' tool to obtain a valid Context7-compatible library ID UNLESS the user explicitly provides a library ID in the format '/org/project' or '/org/project/version' in their query.\n\nEach result includes:\n- Library ID: Context7-compatible identifier (format: /org/project)\n- Name: Library or package name\n- Description: Short summary\n- Code Snippets: Number of available code examples\n- Source Reputation: Authority indicator (High, Medium, Low, or Unknown)\n- Benchmark Score: Quality indicator (100 is the highest score)\n- Versions: List of versions if available. Use one of those versions if the user provides a version in their query. The format of the version is /org/project/version.\n\nFor best results, select libraries based on name match, source reputation, snippet coverage, benchmark score, and relevance to your use case.\n\nSelection Process:\n1. Analyze the query to understand what library/package the user is looking for\n2. Return the most relevant match based on:\n- Name similarity to the query (exact matches prioritized)\n- Description relevance to the query's intent\n- Documentation coverage (prioritize libraries with higher Code Snippet counts)\n- Source reputation (consider libraries with High or Medium reputation more authoritative)\n- Benchmark Score: Quality indicator (100 is the highest score)\n\nResponse Format:\n- Return the selected library ID in a clearly marked section\n- Provide a brief explanation for why this library was chosen\n- If multiple good matches exist, acknowledge this but proceed with the most relevant one\n- If no good matches exist, clearly state this and suggest query refinements\n\nFor ambiguous queries, request clarification before proceeding with a best-guess match.\n\nIMPORTANT: Do not call this tool more than 3 times per question. If you cannot find what you need after 3 calls, use the best result you have.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": "[MaxDepth]",
+              "libraryName": "[MaxDepth]"
+            },
+            "required": [
+              "query",
+              "libraryName"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "edit",
+          "description": "Performs exact string replacements in files. \n\nUsage:\n- You must use your `Read` tool at least once in the conversation before editing. This tool will error if you attempt an edit without reading the file. \n- When editing text from Read tool output, ensure you preserve the exact indentation (tabs/spaces) as it appears AFTER the line number prefix. The line number prefix format is: line number + colon + space (e.g., `1: `). Everything after that space is the actual file content to match. Never include any part of the line number prefix in the oldString or newString.\n- ALWAYS prefer editing existing files in the codebase. NEVER write new files unless explicitly required.\n- Only use emojis if the user explicitly requests it. Avoid adding emojis to files unless asked.\n- The edit will FAIL if `oldString` is not found in the file with an error \"oldString not found in content\".\n- The edit will FAIL if `oldString` is found multiple times in the file with an error \"Found multiple matches for oldString. Provide more surrounding lines in oldString to identify the correct match.\" Either provide a larger string with more surrounding context to make it unique or use `replaceAll` to change every instance of `oldString`. \n- Use `replaceAll` for replacing and renaming strings across the file. This parameter is useful if you want to rename a variable for instance.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "filePath": "[MaxDepth]",
+              "oldString": "[MaxDepth]",
+              "newString": "[MaxDepth]",
+              "replaceAll": "[MaxDepth]"
+            },
+            "required": [
+              "filePath",
+              "oldString",
+              "newString"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_create_directory",
+          "description": "Create a new directory or ensure a directory exists. Can create multiple nested directories in one operation. If the directory already exists, this operation will succeed silently. Perfect for setting up directory structures for projects or ensuring required paths exist. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_directory_tree",
+          "description": "Get a recursive tree view of files and directories as a JSON structure. Each entry includes 'name', 'type' (file/directory), and 'children' for directories. Files have no children array, while directories always have a children array (which may be empty). The output is formatted with 2-space indentation for readability. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "excludePatterns": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_edit_file",
+          "description": "Make line-based edits to a text file. Each edit replaces exact line sequences with new content. Returns a git-style diff showing the changes made. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "edits": "[MaxDepth]",
+              "dryRun": "[MaxDepth]"
+            },
+            "required": [
+              "path",
+              "edits"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_get_file_info",
+          "description": "Retrieve detailed metadata about a file or directory. Returns comprehensive information including size, creation time, last modified time, permissions, and type. This tool is perfect for understanding file characteristics without reading the actual content. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_list_allowed_directories",
+          "description": "Returns the list of directories that this server is allowed to access. Subdirectories within these allowed directories are also accessible. Use this to understand which directories and their nested paths are available before trying to access files.",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_list_directory",
+          "description": "Get a detailed listing of all files and directories in a specified path. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is essential for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_list_directory_with_sizes",
+          "description": "Get a detailed listing of all files and directories in a specified path, including sizes. Results clearly distinguish between files and directories with [FILE] and [DIR] prefixes. This tool is useful for understanding directory structure and finding specific files within a directory. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "sortBy": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_move_file",
+          "description": "Move or rename files and directories. Can move files between directories and rename them in a single operation. If the destination exists, the operation will fail. Works across different directories and can be used for simple renaming within the same directory. Both source and destination must be within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "source": "[MaxDepth]",
+              "destination": "[MaxDepth]"
+            },
+            "required": [
+              "source",
+              "destination"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_read_file",
+          "description": "Read the complete contents of a file as text. DEPRECATED: Use read_text_file instead.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "tail": "[MaxDepth]",
+              "head": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_read_media_file",
+          "description": "Read a file and return it as a base64-encoded content block with its MIME type. Image and audio files are returned as image/audio content; any other file type is returned as an embedded resource. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_read_multiple_files",
+          "description": "Read the contents of multiple files simultaneously. This is more efficient than reading files one by one when you need to analyze or compare multiple files. Each file's content is returned with its path as a reference. Failed reads for individual files won't stop the entire operation. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "paths": "[MaxDepth]"
+            },
+            "required": [
+              "paths"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_read_text_file",
+          "description": "Read the complete contents of a file from the file system as text. Handles various text encodings and provides detailed error messages if the file cannot be read. Use this tool when you need to examine the contents of a single file. Use the 'head' parameter to read only the first N lines of a file, or the 'tail' parameter to read only the last N lines of a file. Operates on the file as text regardless of extension. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "tail": "[MaxDepth]",
+              "head": "[MaxDepth]"
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_search_files",
+          "description": "Recursively search for files and directories matching a pattern. The patterns should be glob-style patterns that match paths relative to the working directory. Use pattern like '*.ext' to match files in current directory, and '**/*.ext' to match files in all subdirectories. Returns full paths to all matching items. Great for finding files when you don't know their exact location. Only searches within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "pattern": "[MaxDepth]",
+              "excludePatterns": "[MaxDepth]"
+            },
+            "required": [
+              "path",
+              "pattern"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "filesystem_write_file",
+          "description": "Create a new file or completely overwrite an existing file with new content. Use with caution as it will overwrite existing files without warning. Handles text content with proper encoding. Only works within allowed directories.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "path": "[MaxDepth]",
+              "content": "[MaxDepth]"
+            },
+            "required": [
+              "path",
+              "content"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "glob",
+          "description": "- Fast file pattern matching tool that works with any codebase size\n- Supports glob patterns like \"**/*.js\" or \"src/**/*.ts\"\n- Returns matching file paths\n- Use this tool when you need to find files by name patterns\n- When you are doing an open-ended search that may require multiple rounds of globbing and grepping, use the Task tool instead\n- You have the capability to call multiple tools in a single response. It is always better to speculatively perform multiple searches as a batch that are potentially useful.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "pattern": "[MaxDepth]",
+              "path": "[MaxDepth]"
+            },
+            "required": [
+              "pattern"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "grep",
+          "description": "- Fast content search tool that works with any codebase size\n- Searches file contents using regular expressions\n- Supports full regex syntax (eg. \"log.*Error\", \"function\\s+\\w+\", etc.)\n- Filter files by pattern with the include parameter (eg. \"*.js\", \"*.{ts,tsx}\")\n- Returns file paths and line numbers with matching lines\n- Use this tool when you need to find files containing specific patterns\n- If you need to identify/count the number of matches within files, use the Bash tool with `rg` (ripgrep) directly. Do NOT use `grep`.\n- When you are doing an open-ended search that may require multiple rounds of globbing and grepping, use the Task tool instead\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "pattern": "[MaxDepth]",
+              "path": "[MaxDepth]",
+              "include": "[MaxDepth]"
+            },
+            "required": [
+              "pattern"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "list_mcp_resource_templates",
+          "description": "Lists resource templates provided by connected MCP servers. Resource templates are parameterized resources that can be read after filling in their URI template.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "server": "[MaxDepth]"
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "list_mcp_resources",
+          "description": "Lists resources provided by connected MCP servers. Resources provide context such as files, database schemas, or application-specific information.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "server": "[MaxDepth]"
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_click",
+          "description": "Perform click on a web page",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "doubleClick": "[MaxDepth]",
+              "button": "[MaxDepth]",
+              "modifiers": "[MaxDepth]"
+            },
+            "required": [
+              "target"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_close",
+          "description": "Close the page",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_console_messages",
+          "description": "Returns all console messages",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "level": "[MaxDepth]",
+              "all": "[MaxDepth]",
+              "filename": "[MaxDepth]"
+            },
+            "required": [
+              "level"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_drag",
+          "description": "Perform drag and drop between two elements",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "startElement": "[MaxDepth]",
+              "startTarget": "[MaxDepth]",
+              "endElement": "[MaxDepth]",
+              "endTarget": "[MaxDepth]"
+            },
+            "required": [
+              "startTarget",
+              "endTarget"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_drop",
+          "description": "Drop files or MIME-typed data onto an element, as if dragged from outside the page. At least one of \"paths\" or \"data\" must be provided.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "paths": "[MaxDepth]",
+              "data": "[MaxDepth]"
+            },
+            "required": [
+              "target"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_evaluate",
+          "description": "Evaluate JavaScript expression on page or element",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "function": "[MaxDepth]",
+              "filename": "[MaxDepth]"
+            },
+            "required": [
+              "function"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_file_upload",
+          "description": "Upload one or multiple files",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "paths": "[MaxDepth]"
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_fill_form",
+          "description": "Fill multiple form fields",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "fields": "[MaxDepth]"
+            },
+            "required": [
+              "fields"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_find",
+          "description": "Search the accessibility snapshot of the current page for text or a regular expression. Returns matching snapshot nodes with a few lines of surrounding context (like search snippets), each shown under its path from the root of the tree, which is cheaper than capturing the whole snapshot when you only need to locate an element and its ref.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "text": "[MaxDepth]",
+              "regex": "[MaxDepth]"
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_handle_dialog",
+          "description": "Handle a dialog",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "accept": "[MaxDepth]",
+              "promptText": "[MaxDepth]"
+            },
+            "required": [
+              "accept"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_hover",
+          "description": "Hover over element on page",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]"
+            },
+            "required": [
+              "target"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_navigate",
+          "description": "Navigate to a URL",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "url": "[MaxDepth]"
+            },
+            "required": [
+              "url"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_navigate_back",
+          "description": "Go back to the previous page in the history",
+          "parameters": {
+            "type": "object",
+            "properties": {},
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_network_request",
+          "description": "Returns full details (headers and body) of a single network request, or a single part if `part` is set. Use the number from browser_network_requests.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "index": "[MaxDepth]",
+              "part": "[MaxDepth]",
+              "filename": "[MaxDepth]"
+            },
+            "required": [
+              "index"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_network_requests",
+          "description": "Returns a numbered list of network requests since loading the page. Use browser_network_request with the number to get full details.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "static": "[MaxDepth]",
+              "filter": "[MaxDepth]",
+              "filename": "[MaxDepth]"
+            },
+            "required": [
+              "static"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_press_key",
+          "description": "Press a key on the keyboard",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "key": "[MaxDepth]"
+            },
+            "required": [
+              "key"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_resize",
+          "description": "Resize the browser window",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "width": "[MaxDepth]",
+              "height": "[MaxDepth]"
+            },
+            "required": [
+              "width",
+              "height"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_run_code_unsafe",
+          "description": "Run a Playwright code snippet. Unsafe: executes arbitrary JavaScript in the Playwright server process and is RCE-equivalent.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "code": "[MaxDepth]",
+              "filename": "[MaxDepth]"
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_select_option",
+          "description": "Select an option in a dropdown",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "values": "[MaxDepth]"
+            },
+            "required": [
+              "target",
+              "values"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_snapshot",
+          "description": "Capture accessibility snapshot of the current page, this is better than screenshot",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "target": "[MaxDepth]",
+              "filename": "[MaxDepth]",
+              "depth": "[MaxDepth]",
+              "boxes": "[MaxDepth]"
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_tabs",
+          "description": "List, create, close, or select a browser tab.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "action": "[MaxDepth]",
+              "index": "[MaxDepth]",
+              "url": "[MaxDepth]"
+            },
+            "required": [
+              "action"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_take_screenshot",
+          "description": "Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "type": "[MaxDepth]",
+              "filename": "[MaxDepth]",
+              "fullPage": "[MaxDepth]",
+              "scale": "[MaxDepth]"
+            },
+            "required": [
+              "type",
+              "scale"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_type",
+          "description": "Type text into editable element",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "element": "[MaxDepth]",
+              "target": "[MaxDepth]",
+              "text": "[MaxDepth]",
+              "submit": "[MaxDepth]",
+              "slowly": "[MaxDepth]"
+            },
+            "required": [
+              "target",
+              "text"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "playwright_browser_wait_for",
+          "description": "Wait for text to appear or disappear or a specified time to pass",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "time": "[MaxDepth]",
+              "text": "[MaxDepth]",
+              "textGone": "[MaxDepth]"
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "question",
+          "description": "Use this tool when you need to ask the user questions during execution. This allows you to:\n1. Gather user preferences or requirements\n2. Clarify ambiguous instructions\n3. Get decisions on implementation choices as you work\n4. Offer choices to the user about what direction to take.\n\nUsage notes:\n- When `custom` is enabled (default), a \"Type your own answer\" option is added automatically; don't include \"Other\" or catch-all options\n- Answers are returned as arrays of labels; set `multiple: true` to allow selecting more than one\n- If you recommend a specific option, make that the first option in the list and add \"(Recommended)\" at the end of the label\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "questions": "[MaxDepth]"
+            },
+            "required": [
+              "questions"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "read",
+          "description": "Read a file or directory from the local filesystem. If the path does not exist, an error is returned.\n\nUsage:\n- The filePath parameter should be an absolute path.\n- By default, this tool returns up to 2000 lines from the start of the file.\n- The offset parameter is the line number to start from (1-indexed).\n- To read later sections, call this tool again with a larger offset.\n- Use the grep tool to find specific content in large files or files with long lines.\n- If you are unsure of the correct file path, use the glob tool to look up filenames by glob pattern.\n- Contents are returned with each line prefixed by its line number as `<line>: <content>`. For example, if a file has contents \"foo\\n\", you will receive \"1: foo\\n\". For directories, entries are returned one per line (without line numbers) with a trailing `/` for subdirectories.\n- Any line longer than 2000 characters is truncated.\n- Call this tool in parallel when you know there are multiple files you want to read.\n- Avoid tiny repeated slices (30 line chunks). If you need more context, read a larger window.\n- This tool can read image files and PDFs and return them as file attachments.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "filePath": "[MaxDepth]",
+              "offset": "[MaxDepth]",
+              "limit": "[MaxDepth]"
+            },
+            "required": [
+              "filePath"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "read_mcp_resource",
+          "description": "Read a specific resource from an MCP server using the server name and resource URI. The URI is an MCP identifier and does not need to be a file URL.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "server": "[MaxDepth]",
+              "uri": "[MaxDepth]"
+            },
+            "required": [
+              "server",
+              "uri"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "skill",
+          "description": "Load a specialized skill when the task at hand matches one of the skills listed in the system prompt.\n\nUse this tool to inject the skill's instructions and resources into current conversation. The output may contain detailed workflow guidance as well as references to scripts, files, etc in the same directory as the skill.\n\nThe skill name must match one of the skills listed in your system prompt.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "name": "[MaxDepth]"
+            },
+            "required": [
+              "name"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "task",
+          "description": "Launch a new agent to handle complex, multistep tasks autonomously.\n\nWhen using the Task tool, you must specify a subagent_type parameter to select which agent type to use.\n\nWhen NOT to use the Task tool:\n- If you want to read a specific file path, use the Read or Glob tool instead of the Task tool, to find the match more quickly\n- If you are searching for a specific class definition like \"class Foo\", use the Grep tool instead, to find the match more quickly\n- If you are searching for code within a specific file or set of 2-3 files, use the Read tool instead of the Task tool, to find the match more quickly\n- If no available agent is a good fit for the task, use other tools directly\n\n\nUsage notes:\n1. Launch multiple agents concurrently whenever possible, to maximize performance; to do that, use a single message with multiple tool uses\n2. Once you have delegated work to an agent, do not duplicate that work yourself. Continue with non-overlapping tasks, or wait for the result. For background tasks, you will be notified automatically when the result is ready.\n3. When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result. The output includes a task_id you can reuse later to continue the same subagent session.\n4. Each agent invocation starts with a fresh context unless you provide task_id to resume the same subagent session (which continues with its previous messages and tool outputs). When starting fresh, your prompt should contain a highly detailed task description for the agent to perform autonomously and you should specify exactly what information the agent should return back to you in its final and only message to you.\n5. The agent's outputs should generally be trusted\n6. Clearly tell the agent whether you expect it to write code or just to do research (search, file reads, web fetches, etc.), since it is not aware of the user's intent. Tell it how to verify its work if possible (e.g., relevant test commands).\n7. If the agent description mentions that it should be used proactively, then you should try your best to use it without the user having to ask for it first. Use your judgement.\n\nAvailable agent types and the tools they have access to:\n- explore: Fast agent specialized for exploring codebases. Use this when you need to quickly find files by patterns (eg. \"src/components/**/*.tsx\"), search code for keywords (eg. \"API endpoints\"), or answer questions about the codebase (eg. \"how do API endpoints work?\"). When calling this agent, specify the desired thoroughness level: \"quick\" for basic searches, \"medium\" for moderate exploration, or \"very thorough\" for comprehensive analysis across multiple locations and naming conventions.\n- general: General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "description": "[MaxDepth]",
+              "prompt": "[MaxDepth]",
+              "subagent_type": "[MaxDepth]",
+              "task_id": "[MaxDepth]",
+              "command": "[MaxDepth]"
+            },
+            "required": [
+              "description",
+              "prompt",
+              "subagent_type"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "todowrite",
+          "description": "Create and maintain a structured task list for the current coding session. Tracks progress, organizes multi-step work, and surfaces status to the user.\n\n## When to use\nUse proactively when:\n- The task requires 3+ distinct steps or actions (not just 3 tool calls for a single conceptual step)\n- The work is non-trivial and benefits from planning\n- The user provides multiple tasks (numbered or comma-separated) or explicitly asks for a todo list\n- New instructions arrive - capture them as todos\n- You start a task - mark it `in_progress` (only one at a time) before working\n- You finish a task - mark it `completed` and add any follow-ups discovered during the work\n\n## When NOT to use\nSkip when:\n- The work is a single, straightforward task (or <3 trivial steps)\n- The request is purely informational or conversational\n- Tracking adds no organizational value\n\n## States\n- `pending` - not started\n- `in_progress` - actively working (exactly ONE at a time)\n- `completed` - finished successfully\n- `cancelled` - no longer needed\n\n## Rules\n- Update status in real time; don't batch completions\n- Mark `completed` only after the required work is actually done, including any required verification. Never based on intent.\n- Keep exactly one `in_progress` while work remains\n- If blocked or partial, keep it `in_progress` and add a follow-up todo describing the blocker\n- Preserve user-provided commands verbatim (flags, args, order)\n- Items should be specific and actionable; break large work into smaller steps\n\n## Examples\n\nUse it:\n- \"Add a dark mode toggle and run the tests\" -> multi-step feature + explicit verification\n- \"Rename getCwd -> getCurrentWorkingDirectory across the repo\" -> grep reveals 15 occurrences in 8 files\n- \"Implement registration, catalog, cart, checkout\" -> multiple complex features\n\nSkip it:\n- \"How do I print Hello World in Python?\" -> informational\n- \"Add a comment to calculateTotal\" -> single edit\n- \"Run npm install and tell me what happened\" -> one command\n\nWhen in doubt, use it.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "todos": "[MaxDepth]"
+            },
+            "required": [
+              "todos"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "webfetch",
+          "description": "- Fetches content from a specified URL\n- Takes a URL and optional format as input\n- Fetches the URL content, converts to requested format (markdown by default)\n- Returns the content in the specified format\n- Use this tool when you need to retrieve and analyze web content\n\nUsage notes:\n  - IMPORTANT: if another tool is present that offers better web fetching capabilities, is more targeted to the task, or has fewer restrictions, prefer using that tool instead of this one.\n  - The URL must be a fully-formed valid URL\n  - HTTP URLs will be automatically upgraded to HTTPS\n  - Format options: \"markdown\" (default), \"text\", or \"html\"\n  - This tool is read-only and does not modify any files\n  - Results may be summarized if the content is very large\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "url": "[MaxDepth]",
+              "format": "[MaxDepth]",
+              "timeout": "[MaxDepth]"
+            },
+            "required": [
+              "url"
+            ]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "write",
+          "description": "Writes a file to the local filesystem.\n\nUsage:\n- This tool will overwrite the existing file if there is one at the provided path.\n- If this is an existing file, you MUST use the Read tool first to read the file's contents. This tool will fail if you did not read the file first.\n- ALWAYS prefer editing existing files in the codebase. NEVER write new files unless explicitly required.\n- NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.\n- Only use emojis if the user explicitly requests it. Avoid writing emojis to files unless asked.\n",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "content": "[MaxDepth]",
+              "filePath": "[MaxDepth]"
+            },
+            "required": [
+              "content",
+              "filePath"
+            ]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto",
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  }
+}
