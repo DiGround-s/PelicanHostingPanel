@@ -1,0 +1,30 @@
+[21:24:38.325] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"role":"assistant","content":"¡"},"finish_reason":null}]}
+
+[21:24:38.351] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":"Hola"},"finish_reason":null}]}
+
+[21:24:38.371] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+[21:24:38.387] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":" ¿"},"finish_reason":null}]}
+
+[21:24:38.400] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":"En"},"finish_reason":null}]}
+
+[21:24:38.441] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":" qué"},"finish_reason":null}]}
+
+[21:24:38.454] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":" puedo"},"finish_reason":null}]}
+
+[21:24:38.466] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":" ayudarte"},"finish_reason":null}]}
+
+[21:24:38.477] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{"content":"?"},"finish_reason":null}]}
+
+[21:24:38.738] data: {"id":"chatcmpl-1785014678174","object":"chat.completion.chunk","created":1785014678,"model":"gpt-5.6-luna","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":30251,"completion_tokens":13,"total_tokens":30264,"prompt_tokens_details":{"cached_tokens":13824}}}
+
+[21:24:38.747] : x-omniroute-cache-hit=false
+: x-omniroute-latency-ms=582
+: x-omniroute-response-cost=0.0283290000
+: x-omniroute-tokens-in=28251
+: x-omniroute-tokens-out=13
+: x-omniroute-version=3.8.48
+: x-omniroute-model=gpt-5.6-luna-max
+: x-omniroute-provider=cx
+[21:24:38.748] data: [DONE]
+
