@@ -260,6 +260,23 @@ class UserControllerTest extends ApplicationApiIntegrationTestCase
     }
 
     /**
+     * Test that a password-only update is accepted.
+     */
+    public function test_password_only_update(): void
+    {
+        $user = User::factory()->create([
+            'is_managed_externally' => true,
+        ]);
+
+        $response = $this->patchJson('/api/application/users/' . $user->id, [
+            'password' => 'new-sftp-password',
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $this->assertTrue(password_verify('new-sftp-password', $user->fresh()->password));
+    }
+
+    /**
      * Test that a user can be deleted from the database.
      */
     public function test_delete_user(): void
